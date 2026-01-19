@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EL PIANO VIEJO - GABRIEL PREMIUM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue: #00f2ff;
+            --dark-blue: #001a2c;
+            --gold: #ffcc00;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            background: #000;
+            color: #fff;
+            font-family: 'Special Elite', serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* --- BACKGROUND ENGINE --- */
+        #bg-canvas {
+            position: fixed; inset: 0;
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.3) contrast(1.3) saturate(1.2);
+            transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: -2;
+        }
+
+        .overlay-vignette {
+            position: fixed; inset: 0;
+            background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.9) 100%);
+            z-index: -1;
+        }
+
+        /* --- EFECTOS DE PARTÍCULAS (POLILLAS) --- */
+        .particles {
+            position: fixed; inset: 0;
+            background: url('https://www.transparenttextures.com/patterns/asfalt-dark.png');
+            opacity: 0.15;
+            z-index: 1;
+            pointer-events: none;
+            animation: move 30s infinite linear;
+        }
+
+        @keyframes move { from { background-position: 0 0; } to { background-position: 500px 1000px; } }
+
+        /* --- CONTENEDOR PRINCIPAL --- */
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 0 10%;
+            text-align: center;
+            z-index: 10;
+            position: relative;
+        }
+
+        .screen { display: none; width: 100%; animation: slideUp 0.8s forwards; }
+        .active { display: flex; flex-direction: column; align-items: center; }
+
+        .title {
+            font-family: 'Cinzel', serif;
+            font-size: 4rem;
+            color: var(--blue);
+            text-shadow: 0 0 20px var(--blue), 0 0 40px rgba(0, 242, 255, 0.5);
+            margin-bottom: 20px;
+            letter-spacing: 5px;
+        }
+
+        .card {
+            background: rgba(0, 26, 44, 0.85);
+            border: 1px solid var(--blue);
+            padding: 40px;
+            border-radius: 4px;
+            box-shadow: 0 0 50px rgba(0,0,0,1), inset 0 0 20px rgba(0, 242, 255, 0.1);
+            max-width: 900px;
+            font-size: 1.5rem;
+            line-height: 1.6;
+            backdrop-filter: blur(10px);
+        }
+
+        /* --- ANIMACIÓN DEL PIANO --- */
+        .piano-box {
+            position: relative;
+            width: 450px; height: 350px;
+            margin-top: 20px;
+            perspective: 1000px;
+        }
+
+        .piano-sprite {
+            width: 100%;
+            transition: all 1.5s cubic-bezier(0.6, -0.28, 0.735, 0.045);
+        }
+
+        .eject {
+            transform: translate(-150%, -100%) rotate(-120deg) scale(0);
+            opacity: 0;
+        }
+
+        .new-piano-fx {
+            filter: drop-shadow(0 0 30px var(--gold));
+            animation: zoomIn 1s forwards;
+        }
+
+        /* --- BOTÓN PREMIUM --- */
+        #next-btn {
+            position: fixed; bottom: 40px; right: 40px;
+            background: transparent;
+            color: var(--blue);
+            border: 2px solid var(--blue);
+            padding: 15px 40px;
+            font-family: 'Cinzel';
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.3s;
+            z-index: 100;
+            display: none;
+        }
+
+        #next-btn:hover { background: var(--blue); color: #000; box-shadow: 0 0 30px var(--blue); }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes zoomIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1.1); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div id="bg-canvas" style="background-image: url('inicio.jpg');"></div>
+    <div class="overlay-vignette"></div>
+    <div class="particles"></div>
+
+    <audio id="pianoAmbience" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="typeSound">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="container">
+        
+        <div class="screen active" id="s0">
+            <h1 class="title">EX PO DE GABRIEL</h1>
+            <p style="font-size: 2rem; color: var(--blue);">HECHO POR GABITO 😎</p>
+            <button onclick="init()" style="margin-top:30px; padding:20px 60px; font-family:'Cinzel'; cursor:pointer; background:var(--blue); border:none; color:#000; font-weight:bold;">INICIAR TRANSMISIÓN</button>
+        </div>
+
+        <div class="screen" id="s1">
+            <h2 class="title">ARTURO USLAR PIETRI</h2>
+            <div class="card" id="txt1"></div>
+        </div>
+
+        <div class="screen" id="s2">
+            <h2 class="title">EL PIANO Y LAS HERMANAS</h2>
+            <div class="card" id="txt2"></div>
+        </div>
+
+        <div class="screen" id="s3">
+            <div class="card" id="txt3" style="margin-bottom: 20px;"></div>
+            <div class="piano-box">
+                <img id="pianoImg" src="piano_viejo.png" class="piano-sprite" alt="Piano">
+            </div>
+        </div>
+
+        <div class="screen" id="s4">
+            <h1 class="title">SISTEMA FINAL</h1>
+            <p>Evalúa el desempeño de Gabriel:</p>
+            <div id="stars"></div>
+            <h2 id="final-status" style="margin-top:20px;"></h2>
+        </div>
+
+    </div>
+
+    <button id="next-btn" onclick="flow()">AVANZAR >></button>
+
+    <script>
+        let step = 0;
+        const mainBg = document.getElementById('bg-canvas');
+        const nextBtn = document.getElementById('next-btn');
+        const typeSound = document.getElementById('typeSound');
+
+        const script = [
+            "",
+            "Uslar Pietri: Maestro del Realismo Mágico. Caraqueño que nos enseñó a ver lo fantástico en nuestra realidad venezolana. Publicó 'Red' en 1936.",
+            "Luisita y Angélica cuidan un piano que es un cadáver de madera. Representa la decadencia aristocrática y la negación de una familia a enfrentar el presente.",
+            "¡APRENDE A SOLTAR! Si el piano está desafinado y lleno de polillas, bótalo. Para que entre música nueva, hay que expulsar lo viejo que ya no suena.",
+            ""
+        ];
+
+        const images = ['inicio.jpg', 'autor.jpg', 'hermanas.jpg', 'habitacion.jpg', 'final.jpg'];
+
+        function init() {
+            document.getElementById('pianoAmbience').play();
+            document.getElementById('s0').classList.remove('active');
+            step = 1;
+            render();
+            nextBtn.style.display = 'block';
+        }
+
+        function render() {
+            mainBg.style.backgroundImage = `url('${images[step]}')`;
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('s' + step).classList.add('active');
+
+            if(step < 4) {
+                typeWriter('txt' + step, script[step]);
+            }
+
+            if(step === 3) {
+                setTimeout(runPianoAnimation, 5000); // Se activa a los 5 segundos de empezar el texto
+            }
+
+            if(step === 4) setupRating();
+        }
+
+        function flow() {
+            if(step < 4) {
+                step++;
+                render();
+            }
+        }
+
+        function typeWriter(id, text) {
+            let i = 0;
+            const el = document.getElementById(id);
+            el.innerHTML = "";
+            const timer = setInterval(() => {
+                el.innerHTML += text.charAt(i);
+                typeSound.currentTime = 0;
+                typeSound.play();
+                i++;
+                if(i >= text.length) clearInterval(timer);
+            }, 50);
+        }
+
+        function runPianoAnimation() {
+            const p = document.getElementById('pianoImg');
+            p.classList.add('eject'); // Sale volando
+            setTimeout(() => {
+                p.src = 'piano_nuevo.png'; // Cambia imagen
+                p.classList.remove('eject');
+                p.classList.add('new-piano-fx'); // Entra brillante
+            }, 1500);
+        }
+
+        function setupRating() {
+            const container = document.getElementById('stars');
+            for(let i=1; i<=10; i++) {
+                container.innerHTML += `<button onclick="vote(${i})" style="padding:10px 15px; margin:5px; background:transparent; color:var(--blue); border:1px solid var(--blue); cursor:pointer; font-family:'Cinzel';">${i}</button>`;
+            }
+        }
+
+        function vote(n) {
+            const status = document.getElementById('final-status');
+            status.innerHTML = n >= 9 ? "10/10 - EXCELENTE TRABAJO, GABRIEL" : "CALIFICACIÓN: " + n;
+            status.style.color = n >= 9 ? "var(--gold)" : "white";
+        }
+    </script>
+</body>
+</html>
